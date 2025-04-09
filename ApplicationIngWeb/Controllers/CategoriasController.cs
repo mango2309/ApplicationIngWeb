@@ -60,5 +60,74 @@ namespace ApplicationIngWeb.Controllers
 
             return Ok(categorias);
         }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetCategoryById([FromRoute] int id)
+        {
+            var category = await dbContext.Categorias.FindAsync(id);
+
+            if (category == null)
+            {
+                return NotFound(); // 404 si no se encuentra la categoría
+            }
+
+            var response = new CategoriaDTO
+            {
+                Id = category.CategoriaId,
+                Name = category.Name,
+                UrlHandle = category.UrlHandle
+            };
+
+            return Ok(response);
+        }
+
+
+        //GET: https://localhost:7034/api/categorias{id}
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateCategory([FromRoute] int id, [FromBody] UpdateCategoryRequestDto request)
+        {
+            var existingCategory = await dbContext.Categorias.FindAsync(id);
+
+            if (existingCategory == null)
+            {
+                return NotFound(); 
+            }
+
+            // Actualiza los campos
+            existingCategory.Name = request.Name;
+            existingCategory.UrlHandle = request.UrlHandle;
+
+            await dbContext.SaveChangesAsync();
+
+            // Devuelve la categoría actualizada como DTO
+            var response = new CategoriaDTO
+            {
+                Id = existingCategory.CategoriaId,
+                Name = existingCategory.Name,
+                UrlHandle = existingCategory.UrlHandle
+            };
+
+            return Ok(response);
+        }
+
+        //DELETE: https://localhost:7034/api/categorias{id}
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteCategory(int id)
+        {
+            var category = await dbContext.Categorias.FindAsync(id);
+
+            if (category == null)
+            {
+                return NotFound(); // 404 si no existe
+            }
+
+            dbContext.Categorias.Remove(category);
+            await dbContext.SaveChangesAsync();
+
+            return NoContent(); // 204 si se eliminó correctamente
+        }
+
+
     }
 }
