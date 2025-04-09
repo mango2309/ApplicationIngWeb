@@ -3,6 +3,7 @@ using ApplicationIngWeb.Models.Domain;
 using ApplicationIngWeb.Models.DTO;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace ApplicationIngWeb.Controllers
 {
@@ -25,7 +26,7 @@ namespace ApplicationIngWeb.Controllers
             //DTO a modelo de dominio
             var category = new Categoria
             {
-                Nombre = request.Nombre,
+                Name = request.Name,
                 UrlHandle = request.UrlHandle,
             };
 
@@ -36,12 +37,28 @@ namespace ApplicationIngWeb.Controllers
 
             var response = new CategoriaDTO
             {
-                CategoriaDtoId = category.CategoriaId,
-                Nombre = category.Nombre,
+                Id= category.CategoriaId,
+                Name= category.Name,
                 UrlHandle = request.UrlHandle,
             };
 
             return Ok(response);
+        }
+
+        //GET: https://localhost:7034/api/Categorias
+        [HttpGet]
+        public async Task<IActionResult> GetAllCategories()
+        {
+            var categorias = await dbContext.Categorias
+                .Select(c => new CategoriaDTO
+                {
+                    Id = c.CategoriaId,
+                    Name = c.Name,
+                    UrlHandle = c.UrlHandle
+                })
+                .ToListAsync();
+
+            return Ok(categorias);
         }
     }
 }
